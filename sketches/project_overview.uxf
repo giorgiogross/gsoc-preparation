@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>150</x>
+      <y>260</y>
+      <w>120</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>PC
+--
+SSH connection 
+to BBB</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>120</y>
+      <w>780</w>
+      <h>580</h>
+    </coordinates>
+    <panel_attributes>BeagleBoard
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>260</x>
+      <y>280</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-&gt;</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>340</x>
+      <y>190</y>
+      <w>210</w>
+      <h>310</h>
+    </coordinates>
+    <panel_attributes>Conection to UART devices
+--
+*Possible software:*
+-minicom
+-screen
+-cu command
+-tip command (BSD...)
+-BusyBox
+
+-
+This   software   should   be
+modified  in  order  to  ease 
+use and mangement of mul-
+tiple UART  devices  connec-
+ted to the BB. 
+Also, we will need an option 
+to read the I/O buffer.</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>620</x>
+      <y>230</y>
+      <w>210</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>UART Device
+--
+From the view of  the  USER 
+SPACE, we see just an UART 
+Device which we can talk to
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>600</x>
+      <y>190</y>
+      <w>470</w>
+      <h>330</h>
+    </coordinates>
+    <panel_attributes>Serial Terminal Server Core
+--
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>830</x>
+      <y>230</y>
+      <w>220</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>UART Device Driver
+--
+The device  driver will manage
+revealing and  maintaining the 
+I/O   buffer   and   transferring 
+calls made to the  UART device 
+via the terminal</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>830</x>
+      <y>370</y>
+      <w>220</w>
+      <h>130</h>
+    </coordinates>
+    <panel_attributes>RPMsg client
+--
+From the view of  the PRUs
+we see just a RPMsg  client
+
+The driver is notified when it 
+should copy the buffer  to sd 
+card</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>620</x>
+      <y>560</y>
+      <w>190</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>PRU0
+--
+Reads data from the UART 
+I/O pins and writes it  into
+a small buffer and  passes
+calls to the UART device</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>830</x>
+      <y>560</y>
+      <w>210</w>
+      <h>120</h>
+    </coordinates>
+    <panel_attributes>PRU1
+--
+Puts the content of  the small 
+buffer into  DDR  memory  as
+soon as it fills up and passes
+calls intended for  the  UART
+device through to PRU0</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>620</x>
+      <y>720</y>
+      <w>190</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>Physical UART Device</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>250</x>
+      <y>530</y>
+      <w>930</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>10.0;10.0;910.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>320</x>
+      <y>150</y>
+      <w>510</w>
+      <h>390</h>
+    </coordinates>
+    <panel_attributes>USER SPACE
+bg=#C5E1A5</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>830</x>
+      <y>150</y>
+      <w>270</w>
+      <h>390</h>
+    </coordinates>
+    <panel_attributes>KERNEL SPACE
+bg=#90CAF9</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1090</x>
+      <y>510</y>
+      <w>50</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>A8
+lt=-
+fg=red</panel_attributes>
+    <additional_attributes>10.0;30.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1090</x>
+      <y>530</y>
+      <w>50</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>lt=-
+PRU
+fg=red</panel_attributes>
+    <additional_attributes>10.0;20.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>920</x>
+      <y>490</y>
+      <w>30</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>800</x>
+      <y>590</y>
+      <w>50</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=-</panel_attributes>
+    <additional_attributes>30.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>700</x>
+      <y>670</y>
+      <w>30</w>
+      <h>70</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>540</x>
+      <y>280</y>
+      <w>100</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;-&gt;</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+</diagram>
