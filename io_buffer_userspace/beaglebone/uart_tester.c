@@ -11,8 +11,10 @@ is an Arduino connected which will send NUM_MSGS.
 #include <termios.h>
 #include <unistd.h>
 #include <signal.h>
+#include <strings.h>
 
 #define NUM_MSGS 200
+#define BAUDRATE B115200
 
 int fd_ttyO1 = -1;
 
@@ -22,13 +24,17 @@ void quitHandler(int s) {
     exit(1);
 }
 
+void handleIO(int s) {
+    printf("RECEIVED UART INTERRUPT\n");
+}
+
 int main(){
     // register signal handler to quit the program
-    struct sigaction sigHandler;
-    sigHandler.sa_handler = quitHandler;
-    sigHandler.sa_flags = 0;
-    sigemptyset(&sigHandler.sa_mask);
-    sigaction(SIGINT, &sigHandler, NULL);
+    struct sigaction stopHandler;
+    stopHandler.sa_handler = quitHandler;
+    stopHandler.sa_flags = 0;
+    sigemptyset(&stopHandler.sa_mask);
+    sigaction(SIGINT, &stopHandler, NULL);
 
     printf("Starting uart tester\n");
     fd_ttyO1 = open("/dev/ttyO1",O_RDWR | O_NOCTTY);
@@ -37,34 +43,45 @@ int main(){
         return -1;
     } else printf("Opened ttyO1\n");
 
+    // sync
+    fcntl(fd_ttyO1, F_SETFL, 0);
+
     struct termios config;
     // get current settings of serial port
-    tcgetattr(fd_ttyO1, &config);
+    if(tcgetattr(fd_ttyO1, &config) == -1) {
+        printf("Not able to get attributes\n");
+    }
+
     // adjust baud rate
-    cfsetispeed(&config, B115200);
-    cfsetospeed(&config, B115200);
+    if(cfsetispeed(&config, (speed_t)BAUDRATE) == -1) {
+        printf("Not able to set ctfo speed\n");
+    }
+    if(cfsetospeed(&config, (speed_t)BAUDRATE) == -1) {
+        printf("Not able to set ctfi speed\n");
+    }
 
     // adjust bit settings
-    // no parity
+    config.c_cflag |= (CLOCAL | CREAD);
+    // set 8N1
     config.c_cflag &= ~PARENB;
-    // cleat data bit size
-    config.c_cflag &= ~CSIZE;
-    // 8 data bit
-    config.c_cflag |= CS8; 
-    // one stop bit
     config.c_cflag &= ~CSTOPB;
+    config.c_cflag &= ~CSIZE;
+    config.c_cflag |= CS8;
 
     // reading data
-    config.c_cflag |= CREAD | CLOCAL;
-    config.c_cc[VMIN] = 255; // if we receive more than 255 bytes we might lose some
+    config.c_cc[VMIN] = 10; // if we receive more than 255 bytes we might lose some
     config.c_cc[VTIME] = 0;
 
     // apply the settings
-    tcsetattr(fd_ttyO1, TCSANOW, &config);
+    tcflush(fd_ttyO1, TCIFLUSH);
+    if(tcsetattr(fd_ttyO1, TCSANOW | TCSAFLUSH, &config) == -1) {
+        printf("Not able to set tio attributes\n");
+    }
 
-    // 10 byte buffer
-    char buffer[200];
+    // 1 byte buffer
+    char buffer[1];
     ssize_t counter = 0;
+
     // exit with ctrl+c
     for(;;) {
         ssize_t readAmnt = read(fd_ttyO1, buffer, sizeof(buffer));
