@@ -5,8 +5,8 @@ After waiting PAUSE_TIME milliseconds the procedure is repeated.
 
 This sketch helps in testing the serial communication on the BeagleBone Black.
 */
-#define NUM_MSGS 200
-#define PAUSE_TIME 10000
+#define NUM_MSGS 500
+#define PAUSE_TIME 3000
 #define CONROL_LED 13
 
 void setup() {
