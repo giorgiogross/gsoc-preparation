@@ -12,13 +12,16 @@ is an Arduino connected which will send NUM_MSGS.
 #include <signal.h>
 #include <strings.h>
 #include "connector.h"
+#include "filelog.h"
 
-#define NUM_MSGS 5000
+#define NUM_MSGS 5000 // to compare to actual message count
 
-int fd_ttyO1 = -1;
+static int fd_ttyO1 = -1;
+static int fd_logfile = -1; 
 
 void quitHandler(int s) {
     close(fd_ttyO1);
+    close(fd_logfile);
     printf("Quit\n"); // maybe add some stats later.
     exit(1);
 }
@@ -36,7 +39,7 @@ int main(){
     sigemptyset(&stopHandler.sa_mask);
     sigaction(SIGINT, &stopHandler, NULL);
 
-    // SIGIO handler
+    // SIGIO handler (for future tests)
     /*struct sigaction ioHandler;
     ioHandler.sa_handler = handleIO;
     ioHandler.sa_flags = 0;
@@ -54,6 +57,8 @@ int main(){
         printf("Error opening ttyO1\n");
         return -1;
     }
+
+    fd_logfile = createFile("/home/debian/gsoc/preparation/logfile");
     
     // 1 byte buffer
     char buffer[1];
@@ -62,10 +67,20 @@ int main(){
     // exit with ctrl+c
     for(;;) {
         ssize_t readAmnt = read(fd_ttyO1, buffer, sizeof(buffer));
+        if(readAmnt == -1) {
+            printf("error while reading serial\n");
+            continue;
+        }
+
         counter += readAmnt;
         printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, counter);
+
+        // save the message to the log file
+        logMessage(fd_logfile, buffer, readAmnt);
     }
 
-    disconnectFromSerial(fd_ttyO1);
+    close(fd_ttyO1);
+    close(fd_logfile);
+
     return 0;
 }
