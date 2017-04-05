@@ -5,21 +5,13 @@
 int connectToSerial(char* device_node) {
     if(device_node == NULL) return -1;
 
-    int devFd = open(device_node, O_RDWR | O_NOCTTY);
-    if(devFd == -1) {
+    int devFd = open(device_node, O_RDWR | O_NOCTTY | O_NONBLOCK);
+    if(devFd == -1) { 
         printf("Error opening %s\n", device_node);
         return -1;
     } else printf("Opened %s\n", device_node);
-
-    // sync
-    // fcntl(devFd, F_SETFL, 0);
-
-    /* Make the file descriptor asynchronous (the manual page says only 
-    O_APPEND and O_NONBLOCK, will work with F_SETFL...) */
-
-    // async receive
-    // fcntl(devFd, F_SETFL, FNDELAY);
-    // fcntl(devFd, F_SETFL,  O_ASYNC );
+    // async file descriptor (Only with O_NONBLOCK or O_APPEND)
+    fcntl(devFd, F_SETFL, O_ASYNC);
 
     struct termios config;
     // get current settings of serial port

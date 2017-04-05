@@ -1,8 +1,7 @@
 /*
-This program will read input data received on logfile_UART1
-UART2, UART 4 and UART5 on the BeagleBone and count how many 
-packages are received. The messages are then written to four
-different files.
+This program will read input data received on logfile_UART1 UART2, UART 4 and 
+UART5 on the BeagleBone and count how many packages are received. The messages 
+are then written to four different files.
 */
 #define _POSIX_SOURCE // signal
 #include <stdio.h>
@@ -10,8 +9,11 @@ different files.
 #include <unistd.h>
 #include <signal.h>
 #include <strings.h>
+#include <errno.h>
 #include "connector.h"
 #include "filelog.h"
+
+void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter);
 
 static int fd_ttyO1 = -1;
 static int fd_ttyO2 = -1;
@@ -22,6 +24,12 @@ static int fd_logfile1 = -1;
 static int fd_logfile2 = -1; 
 static int fd_logfile4 = -1; 
 static int fd_logfile5 = -1; 
+
+// 300 byte buffer - this buffer is used for inputs, every input that's longer 
+// will be written to a new line with a new time tag, so chose this reasonably
+// todo avoid that behaviour and only add a time tag after each CR or NL
+char buffer[301];
+ssize_t counter = 0;
 
 void quitHandler(int s) {
     close(fd_ttyO1);
@@ -39,12 +47,19 @@ void quitHandler(int s) {
 }
 
 void handleIO(int s) {
-    printf("RECEIVED UART INTERRUPT\n");
+    printf("RECEIVED UART INTERRUPT %d\n", s);
+
+    // read io
+    printAndLog(fd_ttyO1, buffer, sizeof(buffer)-1, fd_logfile1, &counter);
+    printAndLog(fd_ttyO2, buffer, sizeof(buffer)-1, fd_logfile2, &counter);
+    printAndLog(fd_ttyO4, buffer, sizeof(buffer)-1, fd_logfile4, &counter);
+    printAndLog(fd_ttyO5, buffer, sizeof(buffer)-1, fd_logfile5, &counter);
 }
 
-void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter);
-
 int main(){
+    // null terminate the buffer
+    buffer[300] = '\0';
+
     // register signal handler to quit the program
     struct sigaction stopHandler = {
         .sa_handler = quitHandler,
@@ -53,16 +68,15 @@ int main(){
     sigemptyset(&stopHandler.sa_mask);
     sigaction(SIGINT, &stopHandler, NULL);
 
-    // SIGIO handler (for future tests)
-    /*struct sigaction ioHandler;
-    ioHandler.sa_handler = handleIO;
-    ioHandler.sa_flags = 0;
-    ioHandler.sa_restorer = NULL;
+    // register signal handler for SIGIO before making I/O async
+    struct sigaction ioHandler = {
+        .sa_handler = handleIO,
+        .sa_mask = 0,
+        .sa_flags = 0,
+        .sa_restorer = NULL
+    };
     sigemptyset(&ioHandler.sa_mask);
-    sigaction(SIGIO, &ioHandler, NULL);*/
-
-    /* allow the process to receive SIGIO */
-    // fcntl(fd_ttyO1, F_SETOWN, getpid());
+    sigaction(SIGIO, &ioHandler, NULL);
 
     printf("Starting uart tester\n");
 
@@ -100,20 +114,9 @@ int main(){
     fd_logfile2 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART2");
     fd_logfile4 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART4");
     fd_logfile5 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART5");
-    
-    // 300 byte buffer - this buffer is used for inputs, every input that's longer 
-    // will be written to a new line with a new time tag, so chose this reasonably
-    char buffer[300];
-    ssize_t counter = 0;
+
     for(;;) { // exit with ctrl+c
-        printAndLog(fd_ttyO1, buffer, sizeof(buffer), fd_logfile1, &counter);
-        memset(&buffer, 0, sizeof(buffer));
-        printAndLog(fd_ttyO2, buffer, sizeof(buffer), fd_logfile2, &counter);
-        memset(&buffer, 0, sizeof(buffer));
-        printAndLog(fd_ttyO4, buffer, sizeof(buffer), fd_logfile4, &counter);
-        memset(&buffer, 0, sizeof(buffer));
-        printAndLog(fd_ttyO5, buffer, sizeof(buffer), fd_logfile5, &counter);
-        memset(&buffer, 0, sizeof(buffer));
+        // keep us alive
     }
     
     close(fd_ttyO1);
@@ -129,18 +132,30 @@ int main(){
     return 0;
 }
 
-
 void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter){
-    ssize_t readAmnt = read(fd, buffer, size);
-    if(readAmnt == -1) {
-        printf("error while reading serial\n");
-        return;
-    }
-    *msg_counter += readAmnt;
-    printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, *msg_counter);
-    printf("First char: %c   -   Last char ascii code: %d\n\n", buffer[0], buffer[readAmnt-1]);
+    ssize_t readAmnt = 0;
 
-    if(fd_logfile < 0) return;
-    // save the messages to the log file
-    logMessage(fd_logfile, buffer, readAmnt);
+    // read as long as there is still something left to read
+    do {
+        readAmnt = read(fd, buffer, size);
+        if(readAmnt == -1) {
+            // print error code
+            int mErrno = errno;
+            perror(NULL);
+            printf("error while reading serial, errno: %d\n", mErrno);
+            return;
+        }
+        *msg_counter += readAmnt;
+        printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, *msg_counter);
+        printf("First char: %c   -   Last char ascii code: %d\n\n", buffer[0], buffer[readAmnt-1]);
+
+        if(fd_logfile < 0) goto cleanup;
+
+        // save the messages to the log file
+        logMessage(fd_logfile, buffer, readAmnt);
+
+cleanup:
+        // set the buffer content to 0
+        memset(buffer, 0, size);
+    } while(readAmnt == size);
 }
