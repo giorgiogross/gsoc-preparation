@@ -6,8 +6,15 @@ After waiting PAUSE_TIME milliseconds the procedure is repeated.
 This sketch helps in testing the serial communication on the BeagleBone Black.
 */
 
-#define NUM_MSGS 20000
+// set this to 0 for non-canonical input mode
+#define FINISH_WITH_NL 1
+
+// number of messages sent at once
+#define NUM_MSGS 4096
+// pause before sending starts
 #define PAUSE_TIME 3000
+
+// control led on the board
 #define CONROL_LED 13
 
 // 0 if you want to send the messages only once or -1 to send continuously
@@ -33,5 +40,7 @@ void loop() {
   for(int i = 0; i < NUM_MSGS; i++){
     Serial1.write('1');
   }
+  if(FINISH_WITH_NL) Serial1.println("");
+  
   if(ONE_SHOT == 0) ONE_SHOT++;
 }
