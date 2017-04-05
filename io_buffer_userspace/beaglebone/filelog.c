@@ -3,7 +3,7 @@
 int createFile(char* path) {
     int fd = open(path, O_CREAT | O_RDWR | O_APPEND, S_IRWXU | S_IRGRP | S_IWGRP);
     if(fd == -1) {
-        printf("Could not open / create file\n");
+        printf("Could not open/create file\n");
         return -1;
     }
 }
