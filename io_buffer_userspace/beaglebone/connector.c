@@ -1,6 +1,6 @@
 #include "connector.h"
 
-#define BAUDRATE B115200
+#define BAUDRATE B230400
 
 int connectToSerial(char* device_node) {
     if(device_node == NULL) return -1;
@@ -49,7 +49,7 @@ int connectToSerial(char* device_node) {
 
     /* fetch bytes as they become available */
     config.c_cc[VMIN] = 1;
-    config.c_cc[VTIME] = 1;
+    config.c_cc[VTIME] = 0;
 
     // apply the settings
     tcflush(devFd, TCIFLUSH);

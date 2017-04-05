@@ -1,9 +1,8 @@
 /*
-This program will read input data received on UART1
-on the BeagleBone and count how many packages are
-received. The message counter will be compared with
-the expected message count NUM_MSGS. On UART1 there
-is an Arduino connected which will send NUM_MSGS.
+This program will read input data received on logfile_UART1
+UART2, UART 4 and UART5 on the BeagleBone and count how many 
+packages are received. The messages are then written to four
+different files.
 */
 #define _POSIX_SOURCE // signal
 #include <stdio.h>
@@ -14,30 +13,28 @@ is an Arduino connected which will send NUM_MSGS.
 #include "connector.h"
 #include "filelog.h"
 
-#define NUM_MSGS 5000 // to compare to actual message count
-
-static int fd_ttyO0 = -1;
 static int fd_ttyO1 = -1;
 static int fd_ttyO2 = -1;
 static int fd_ttyO4 = -1;
+static int fd_ttyO5 = -1;
 
-static int fd_logfile0 = -1; 
 static int fd_logfile1 = -1; 
 static int fd_logfile2 = -1; 
 static int fd_logfile4 = -1; 
+static int fd_logfile5 = -1; 
 
 void quitHandler(int s) {
-    close(fd_ttyO0);
     close(fd_ttyO1);
     close(fd_ttyO2);
     close(fd_ttyO4);
+    close(fd_ttyO5);
 
-    close(fd_logfile0);
     close(fd_logfile1);
     close(fd_logfile2);
     close(fd_logfile4);
+    close(fd_logfile5);
 
-    printf("Quit\n"); // maybe add some stats later.
+    // maybe add some stats later.
     exit(1);
 }
 
@@ -45,20 +42,7 @@ void handleIO(int s) {
     printf("RECEIVED UART INTERRUPT\n");
 }
 
-void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter){
-    ssize_t readAmnt = read(fd, buffer, size);
-    if(readAmnt == -1) {
-        printf("error while reading serial\n");
-        return;
-    }
-
-    msg_counter += readAmnt;
-    printf("Read %zd bytes: %s           #total until now: %zd\n", readAmnt, buffer, msg_counter);
-
-    if(fd_logfile < 0) return;
-    // save the messages to the log file
-    logMessage(fd_logfile, buffer, readAmnt);
-}
+void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter);
 
 int main(){
     // register signal handler to quit the program
@@ -82,54 +66,75 @@ int main(){
 
     printf("Starting uart tester\n");
 
-    fd_ttyO0 = connectToSerial("/dev/ttyO0");
-    if(fd_ttyO1 == -1) {
-        printf("Error opening ttyO0\n");
+    fd_ttyO5 = connectToSerial("/dev/ttyO5");
+    if(fd_ttyO5 == -1) {
+        printf("Error opening ttyO5\n");
         return -1;
     }
 
     fd_ttyO1 = connectToSerial("/dev/ttyO1");
     if(fd_ttyO1 == -1) {
         printf("Error opening ttyO1\n");
+        close(fd_ttyO5);
         return -1;
     }
 
     fd_ttyO2 = connectToSerial("/dev/ttyO2");
-    if(fd_ttyO1 == -1) {
+    if(fd_ttyO2 == -1) {
         printf("Error opening ttyO2\n");
+        close(fd_ttyO5);
+        close(fd_ttyO1);
         return -1;
     }
 
     fd_ttyO4 = connectToSerial("/dev/ttyO4");
-    if(fd_ttyO1 == -1) {
+    if(fd_ttyO4 == -1) {
         printf("Error opening ttyO4\n");
+        close(fd_ttyO5);
+        close(fd_ttyO1);
+        close(fd_ttyO2);
         return -1;
     }
 
-    fd_logfile0 = createFile("/home/debian/gsoc/preparation/logfile_UART0");
-    fd_logfile1 = createFile("/home/debian/gsoc/preparation/logfile_UART1");
-    fd_logfile2 = createFile("/home/debian/gsoc/preparation/logfile_UART2");
-    fd_logfile4 = createFile("/home/debian/gsoc/preparation/logfile_UART4");
+    fd_logfile1 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART1");
+    fd_logfile2 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART2");
+    fd_logfile4 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART4");
+    fd_logfile5 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART5");
     
     // 1 byte buffer
-    char buffer[1];
+    char buffer[4];
     ssize_t counter = 0;
     for(;;) { // exit with ctrl+c
-        printAndLog(fd_ttyO0, buffer, sizeof(buffer), fd_logfile0, &counter);
         printAndLog(fd_ttyO1, buffer, sizeof(buffer), fd_logfile1, &counter);
         printAndLog(fd_ttyO2, buffer, sizeof(buffer), fd_logfile2, &counter);
         printAndLog(fd_ttyO4, buffer, sizeof(buffer), fd_logfile4, &counter);
+        printAndLog(fd_ttyO5, buffer, sizeof(buffer), fd_logfile5, &counter);
     }
     
-    close(fd_ttyO0);
     close(fd_ttyO1);
     close(fd_ttyO2);
     close(fd_ttyO4);
+    close(fd_ttyO5);
 
-    close(fd_logfile0);
     close(fd_logfile1);
     close(fd_logfile2);
     close(fd_logfile4);
+    close(fd_logfile5);
 
     return 0;
+}
+
+
+void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter){
+    ssize_t readAmnt = read(fd, buffer, size);
+    if(readAmnt == -1) {
+        printf("error while reading serial\n");
+        return;
+    }
+    *msg_counter += readAmnt;
+    printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, *msg_counter);
+
+    if(fd_logfile < 0) return;
+    // save the messages to the log file
+    logMessage(fd_logfile, buffer, readAmnt);
 }
