@@ -20,10 +20,10 @@ int logMessage(int fd, char* buf, int size) {
     char* ascTime = asctime(mTime);
     int ascTimeLen = strlen(ascTime);
     ascTime[ascTimeLen - 1] = 0; // get rid of the new line
-    int count = ascTimeLen + 1 + size + 6;
+    int count = ascTimeLen + size + 4;
     char mBuf[count];
     // copy everiting into a convenient message:
-    sprintf(mBuf, "%s ## %s\n", ascTime, buf);
+    sprintf(mBuf, "%s ## %s", ascTime, buf);
 
     // write and return
     return 0 <= write(fd, &mBuf, count);

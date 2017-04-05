@@ -101,8 +101,9 @@ int main(){
     fd_logfile4 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART4");
     fd_logfile5 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART5");
     
-    // 1 byte buffer
-    char buffer[255];
+    // 300 byte buffer - this buffer is used for inputs, every input that's longer 
+    // will be written to a new line with a new time tag, so chose this reasonably
+    char buffer[300];
     ssize_t counter = 0;
     for(;;) { // exit with ctrl+c
         printAndLog(fd_ttyO1, buffer, sizeof(buffer), fd_logfile1, &counter);
@@ -137,7 +138,7 @@ void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_co
     }
     *msg_counter += readAmnt;
     printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, *msg_counter);
-    printf("First char: %c   -   Last char: %c\n\n", buffer[0], buffer[readAmnt-1]);
+    printf("First char: %c   -   Last char ascii code: %d\n\n", buffer[0], buffer[readAmnt-1]);
 
     if(fd_logfile < 0) return;
     // save the messages to the log file

@@ -42,18 +42,19 @@ int connectToSerial(char* device_node) {
     config.c_cflag &= ~PARENB;
     config.c_cflag &= ~CSTOPB;
 
-    /* setup for non-canonical mode */
-    config.c_iflag &= ~(ISTRIP | IXON);
-    config.c_lflag &= ~(ICANON);
-    config.c_oflag &= ~OPOST;
+    /* setup for canonical mode */
+    config.c_iflag = IGNPAR | IGNCR | ISTRIP | IXON | IXON | IUTF8;
+    config.c_lflag |= ICANON;
+    config.c_oflag |= ONLRET;
+    config.c_oflag |= OPOST;
 
     /* fetch bytes as they become available */
-    config.c_cc[VMIN] = 255; // maximum is 255 bytes
-    config.c_cc[VTIME] = 1;
+    config.c_cc[VMIN] = 1; // maximum is 255 bytes
+    config.c_cc[VTIME] = 0;
 
     // apply the settings
-    tcflush(devFd, TCIFLUSH);
-    if(tcsetattr(devFd, TCSANOW | TCSAFLUSH, &config) == -1) {
+    tcflush(devFd, TCIOFLUSH);
+    if(tcsetattr(devFd, TCSANOW, &config) == -1) {
         printf("Not able to set tio attributes\n");
     }
 
