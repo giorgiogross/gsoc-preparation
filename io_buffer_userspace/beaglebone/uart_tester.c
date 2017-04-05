@@ -71,17 +71,6 @@ int main(){
     sigemptyset(&stopHandler.sa_mask);
     sigaction(SIGINT, &stopHandler, NULL);
 
-    // SIGIO handler (for future tests)
-    /*struct sigaction ioHandler;
-    ioHandler.sa_handler = handleIO;
-    ioHandler.sa_flags = 0;
-    ioHandler.sa_restorer = NULL;
-    sigemptyset(&ioHandler.sa_mask);
-    sigaction(SIGIO, &ioHandler, NULL);*/
-
-    /* allow the process to receive SIGIO */
-    // fcntl(fd_ttyO1, F_SETOWN, getpid());
-
     printf("Starting uart tester\n");
 
     fd_ttyO5 = connectToSerial("/dev/ttyO5");
