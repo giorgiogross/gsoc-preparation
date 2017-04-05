@@ -6,24 +6,32 @@ After waiting PAUSE_TIME milliseconds the procedure is repeated.
 This sketch helps in testing the serial communication on the BeagleBone Black.
 */
 
-#define NUM_MSGS 5000
-#define NUM_MSGS 5000
+#define NUM_MSGS 20000
 #define PAUSE_TIME 3000
 #define CONROL_LED 13
 
+// 0 if you want to send the messages only once or -1 to send continuously
+int ONE_SHOT = 0;
+
 void setup() {
-  Serial.begin(115200);
-  Serial1.begin(115200);
+  Serial.begin(230400);
+  Serial1.begin(230400);
   
   pinMode(CONROL_LED, OUTPUT);
 }
 
 void loop() {
-  // signal start of transmission
   digitalWrite(CONROL_LED, HIGH);
   delay(PAUSE_TIME);
+  
+  // don't do anything if we already sent all messages and 
+  // ONE_SHOT was initially set to 0
+  if(ONE_SHOT > 0) return;
+  
+  // signal start of transmission
   digitalWrite(CONROL_LED, LOW);
   for(int i = 0; i < NUM_MSGS; i++){
     Serial1.write('1');
   }
+  if(ONE_SHOT == 0) ONE_SHOT++;
 }
