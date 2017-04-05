@@ -48,8 +48,8 @@ int connectToSerial(char* device_node) {
     config.c_oflag &= ~OPOST;
 
     /* fetch bytes as they become available */
-    config.c_cc[VMIN] = 1;
-    config.c_cc[VTIME] = 0;
+    config.c_cc[VMIN] = 255; // maximum is 255 bytes
+    config.c_cc[VTIME] = 1;
 
     // apply the settings
     tcflush(devFd, TCIFLUSH);

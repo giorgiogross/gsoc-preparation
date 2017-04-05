@@ -102,13 +102,17 @@ int main(){
     fd_logfile5 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART5");
     
     // 1 byte buffer
-    char buffer[4];
+    char buffer[255];
     ssize_t counter = 0;
     for(;;) { // exit with ctrl+c
         printAndLog(fd_ttyO1, buffer, sizeof(buffer), fd_logfile1, &counter);
+        memset(&buffer, 0, sizeof(buffer));
         printAndLog(fd_ttyO2, buffer, sizeof(buffer), fd_logfile2, &counter);
+        memset(&buffer, 0, sizeof(buffer));
         printAndLog(fd_ttyO4, buffer, sizeof(buffer), fd_logfile4, &counter);
+        memset(&buffer, 0, sizeof(buffer));
         printAndLog(fd_ttyO5, buffer, sizeof(buffer), fd_logfile5, &counter);
+        memset(&buffer, 0, sizeof(buffer));
     }
     
     close(fd_ttyO1);
@@ -133,6 +137,7 @@ void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_co
     }
     *msg_counter += readAmnt;
     printf("Read %d bytes: %s           #total until now: %d\n", readAmnt, buffer, *msg_counter);
+    printf("First char: %c   -   Last char: %c\n\n", buffer[0], buffer[readAmnt-1]);
 
     if(fd_logfile < 0) return;
     // save the messages to the log file
