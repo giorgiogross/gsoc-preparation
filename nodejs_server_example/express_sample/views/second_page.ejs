@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+</head>
+<body>
+
+<% include templates/header.ejs %>
+
+<h1><%= title %></h1> <!-- title is set in routes.index.js -->
+<!-- plain javascript: <%       %> -->
+<p>Welcome to <%= title %></p>
+
+<p>
+<h4><%= videodata.categoryName %></h4>
+<ul>
+    <!-- print all the categories of the videodata.json file -->
+    <% videodata.categories.forEach(function(item){ %>
+    <li><%= item.categoryName %></li>
+    <% }); %>
+</ul>
+</p>
+
+</body>
+</html>

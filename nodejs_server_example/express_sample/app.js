@@ -11,8 +11,13 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');          // index page
 var users = require('./routes/users');          // users page
+var second_page = require('./routes/second_page');
 
 var app = express();                            // use express in this app
+
+app.locals.local_var = "123456789";             // locals are available everywhere in the app
+app.locals.videodata = require('./videodata.json');
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -29,6 +34,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);                            // redirect calls to view index to ./routes/index
 app.use('/users', users);                       // redirect calls to view users to ./routes/users
+app.use('/second_page', second_page);
 
 // production error handler
 // catch 404 and forward to error handler

@@ -5,6 +5,11 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
+
+    <% include templates/header.ejs %>
+
+    <p><%= local_var %></p>
+
     <h1><%= title %></h1> <!-- title is set in routes.index.js -->
     <!-- plain javascript: <% %> -->
     <p>Welcome to <%= title %></p>
