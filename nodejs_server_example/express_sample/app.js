@@ -16,8 +16,6 @@ var second_page = require('./routes/second_page');
 var app = express();                            // use express in this app
 
 app.locals.local_var = "123456789";             // locals are available everywhere in the app
-app.locals.videodata = require('./videodata.json');
-
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

@@ -9,7 +9,7 @@
 <% include templates/header.ejs %>
 
 <h1><%= title %></h1> <!-- title is set in routes.index.js -->
-<!-- plain javascript: <%       %> -->
+<!-- plain javascript: <%           %> -->
 <p>Welcome to <%= title %></p>
 
 <p>
@@ -17,7 +17,7 @@
 <ul>
     <!-- print all the categories of the videodata.json file -->
     <% videodata.categories.forEach(function(item){ %>
-    <li><%= item.categoryName %></li>
+    <li><%= item.categoryName %> <a href=<%= base.concat(item.categoryID); %> >Link</a></li>
     <% }); %>
 </ul>
 </p>
