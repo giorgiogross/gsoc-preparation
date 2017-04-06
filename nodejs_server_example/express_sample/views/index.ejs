@@ -5,7 +5,14 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><%= title %></h1>
+    <h1><%= title %></h1> <!-- title is set in routes.index.js -->
+    <!-- plain javascript: <% %> -->
     <p>Welcome to <%= title %></p>
+
+    <ul>
+        <% for (var i = 0; i < 10; i++) { %>
+            <li>Item number <%= i%></li>
+        <% } %>
+    </ul>
   </body>
 </html>

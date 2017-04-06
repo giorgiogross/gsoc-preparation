@@ -1,18 +1,22 @@
+/**
+ * Require all necessary modules
+ */
+
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
+var logger = require('morgan');                 // logging
+var cookieParser = require('cookie-parser');    // for cookies
 var bodyParser = require('body-parser');
 
-var index = require('./routes/index');
-var users = require('./routes/users');
+var index = require('./routes/index');          // index page
+var users = require('./routes/users');          // users page
 
-var app = express();
+var app = express();                            // use express in this app
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.set('view engine', 'ejs');                  // "embedded java script"
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -21,17 +25,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+// ^ data logging...
 
-app.use('/', index);
-app.use('/users', users);
+app.use('/', index);                            // redirect calls to view index to ./routes/index
+app.use('/users', users);                       // redirect calls to view users to ./routes/users
 
+// production error handler
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
-  next(err);
+  next(err);                                    // call the next error hancler
 });
 
+// development error handler
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development

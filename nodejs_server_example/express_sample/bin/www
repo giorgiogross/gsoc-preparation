@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 
 /**
+ * This file is responsible for starting everything up and transferring the control to app.js
+ */
+
+/**
  * Module dependencies.
  */
 
