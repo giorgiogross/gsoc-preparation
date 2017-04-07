@@ -1,2 +1,2 @@
 # NodeJS on the BeagleBone
-At the moment there is just a hello world web server, but I will add more advanced samples here to try out NodeJS and ReactJS 
+These are several NodeJS samples to show how to use Node, Expect, React and C/C++ bindings and how to create a rest interface with Node.
