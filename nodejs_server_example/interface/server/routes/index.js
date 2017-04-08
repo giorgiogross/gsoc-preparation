@@ -20,9 +20,10 @@ console.log(myAddon.hello());
 c_wrapper.printHello();
 console.log(c_wrapper.add(3, 2));
 console.log(c_wrapper.mul2(2));
-/*c_wrapper.makeCallback(function(msg){
+console.log(c_wrapper.makeCallback()); // C++ function is the callback function
+c_wrapper.makeAsyncCallback(function(msg){ // this is the callback function
     console.log(msg);
-});*/
+});
 
 
 module.exports = router;

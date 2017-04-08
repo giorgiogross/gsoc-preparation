@@ -1,130 +1,127 @@
-#include <node.h>
-#include <iostream>
+#include <nan.h> // remember to include the nan directory in the binding.gyp file
+#include "../lib/exchange.h"
 
 // include libtest header file (libtest is written in c and compiled into libmytest.a which is declared in binding.gyp)
 extern "C" {
-    #include "/Users/Giorgio/Documents/GSoC/gsoc-preparation/static_lib/libtest.h"
+    #include "../lib/libtest.h"
 }
 
-namespace demo {
+using namespace Nan;
+using namespace v8;
 
-using v8::Exception;
-using v8::Function;
-using v8::FunctionCallbackInfo;
-using v8::Isolate;
-using v8::Local;
-using v8::Number;
-using v8::Object;
-using v8::String;
-using v8::Value;
-
-void IHello(const FunctionCallbackInfo<Value>& args) {
-    printHello();
+// delegate calls to printHello()
+NAN_METHOD(IHello) {
+  printHello();
 }
 
-// This is the implementation of the "add" method
-// Input arguments are passed using the
-// const FunctionCallbackInfo<Value>& args struct
-void IAdd(const FunctionCallbackInfo<Value>& args) {
-  Isolate* isolate = args.GetIsolate();
-
-  // Check the number of arguments passed.
-  if (args.Length() < 2) {
-    // Throw an Error that is passed back to JavaScript
-    isolate->ThrowException(Exception::TypeError(
-        String::NewFromUtf8(isolate, "Wrong number of arguments")));
-    return;
+// This is the delegation to the "add" method
+// Input arguments can be read using the info object
+NAN_METHOD(IAdd) {
+  // error checking
+  Nan::Maybe<int> v1 = Nan::To<int>(info[0]);
+  Nan::Maybe<int> v2 = Nan::To<int>(info[0]);
+  if(info.Length() < 2) {
+          return;
   }
 
-  // Check the argument types
-  if (!args[0]->IsNumber() || !args[1]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(
-        String::NewFromUtf8(isolate, "Wrong arguments")));
-    return;
+  // delegate call
+  int res = add(v1.FromJust(), v2.FromJust());
+
+  // return result
+  Local<Number> resVal = Nan::New(res);
+  info.GetReturnValue().Set(resVal);
+}
+
+// Delegates to multiplyWith2
+NAN_METHOD(IMult2) {
+  // error checking
+  Nan::Maybe<int> v1 = Nan::To<int>(info[0]);
+  if(info.Length() < 1) {
+          return;
   }
 
-  // Perform the operation
-  int value = add(args[0]->NumberValue(), args[1]->NumberValue());
-  Local<Number> num = Number::New(isolate, value);
+  // delegate call
+  int val = v1.FromJust();
+  multiplyWith2(&val);
 
-  // Set the return value (using the passed in
-  // FunctionCallbackInfo<Value>&)
-  args.GetReturnValue().Set(num);
+  // return result
+  Local<Number> resVal = Nan::New(val);
+  info.GetReturnValue().Set(resVal);
 }
 
-void IMult2(const FunctionCallbackInfo<Value>& args) {
-    Isolate* isolate = args.GetIsolate();
+NAN_METHOD(IMakeCallback) {
+    Nan:: HandleScope scope;
 
-    // Check the number of arguments passed.
-    if (args.Length() < 1) {
-      // Throw an Error that is passed back to JavaScript
-      isolate->ThrowException(Exception::TypeError(
-          String::NewFromUtf8(isolate, "Wrong number of arguments")));
-      return;
-    }
+    v8::Local<v8::String> res = Nan::New<v8::String>("-").ToLocalChecked();
 
-    // Check the argument types
-    if (!args[0]->IsNumber()) {
-      isolate->ThrowException(Exception::TypeError(
-          String::NewFromUtf8(isolate, "Wrong arguments")));
-      return;
-    }
+    Exchange x(
+        [&](void * data) {
+            res = Nan::New<v8::String>((char*)data).ToLocalChecked();
+       });
 
-    // Perform the operation
-    int value = args[0]->NumberValue();
-    multiplyWith2(&value);
-    Local<Number> num = Number::New(isolate, value);
-
-    // Set the return value (using the passed in
-    // FunctionCallbackInfo<Value>&)
-    args.GetReturnValue().Set(num);
-}
-extern "C" void dummy(char*, void* const);
-void dummy(char* value, void* ar){
-
-    std::cout << ar << "\n";
-    const FunctionCallbackInfo<Value>& args = (FunctionCallbackInfo<Value>&)ar;
-
-    Isolate* isolate = args.GetIsolate();
-    std::cout << "Iso:" << isolate << "\n";
-
-    Local<Function> cb = Local<Function>::Cast(args[0]);
-    std::cout << &args << "\n";
-
-    const unsigned argc = 1;
-    Local<Value> argv[argc] = { String::NewFromUtf8(isolate, value) };
-    cb->Call(Null(isolate), argc, argv);
-    std::cout << &args << "\n";
+    makeCallback((void*)&x);
+    info.GetReturnValue().Set(res);
 }
 
-// this still has some issues
-void IMakeCallback(const FunctionCallbackInfo<Value>& args) {
-    Isolate* isolate = args.GetIsolate();
+// Async worker to process async callbacks (e.g. registering and then calling observers)
+class MyWorker : public AsyncWorker {
+    public:
+        MyWorker(Callback *callback) // init worker
+        : AsyncWorker(callback) {}
 
-    // Check the number of arguments passed.
-    if (args.Length() < 1) {
-      // Throw an Error that is passed back to JavaScript
-      isolate->ThrowException(Exception::TypeError(
-          String::NewFromUtf8(isolate, "Wrong number of arguments")));
-      return;
-    }
+        ~MyWorker() {}
 
-    std::cout << "Iso:" << isolate << "\n";
-    std::cout << &args << "\n";
-    void* ar = (void*)&args;
-    std::cout << ar << "\n";
+        // called by libuv to dispatch the worker
+        void Execute () {
 
-    registerObserver(&dummy, ar);
+            // this code is running in its own thread and is separated from the node code. That means JS can't access
+            // our variables and we can't access JS variables. We manage now all our memory on our own.
+
+            Exchange x(
+                [&](void* data) {
+                    result = (char*) data;
+                }
+            );
+
+            // the "real" callback is the Exchange object, not the JS callback function! We call the exchange object's
+            // functions when an event occurs. When we return Execute() ends and HandleOKCallback is called. There we
+            // pass the parameters given to Exchange on to the JS callback function.
+            doAsyncOperation((void*)&x);
+        }
+
+        // Called after the async worker finished. This function is then executed in the event loop
+        void HandleOKCallback () {
+            Nan:: HandleScope scope;
+
+            v8::Local<v8::String> res = Nan::New<v8::String>(result).ToLocalChecked();
+            Local<Value> argv[] = {
+                res
+            };
+
+            callback->Call(1, argv);
+
+        }
+    private:
+        char* result;
+};
+
+NAN_METHOD(IRegisterObserver) {
+    Callback *callback = new Callback(info[0].As<Function>());
+
+    AsyncQueueWorker(new MyWorker(callback));
 }
 
-void Init(Local<Object> exports) {
-  // declare all methods here
-  NODE_SET_METHOD(exports, "printHello", IHello);
-  NODE_SET_METHOD(exports, "add", IAdd);
-  NODE_SET_METHOD(exports, "mul2", IMult2);
-  // NODE_SET_METHOD(exports, "makeCallback", IMakeCallback);
+NAN_MODULE_INIT(Init) {
+  Nan::Set(target, New<String>("printHello").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(IHello)).ToLocalChecked());
+  Nan::Set(target, New<String>("add").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(IAdd)).ToLocalChecked());
+  Nan::Set(target, New<String>("mul2").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(IMult2)).ToLocalChecked());
+  Nan::Set(target, New<String>("makeCallback").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(IMakeCallback)).ToLocalChecked());
+  Nan::Set(target, New<String>("makeAsyncCallback").ToLocalChecked(),
+      GetFunction(New<FunctionTemplate>(IRegisterObserver)).ToLocalChecked());
 }
 
-NODE_MODULE(c_wrapper, Init)
-
-}  // namespace demo
+NODE_MODULE(c_wrapper_addon, Init)
