@@ -17,10 +17,46 @@
 */
 
 #include "libtest.h"
+#include <unistd.h>
 
 /*
 Simple static library with a single function to get experience in creating libraies.
 */
 void printHello() {
     printf("Hello, this is printed when the static library is called\n");
+}
+
+/*
+a+b
+*/
+int add(int a, int b) {
+    return a+b;
+}
+
+/*
+Multiply the value saved in a with 2
+*/
+void multiplyWith2(int* a) {
+    *a = *a * 2;
+}
+
+/*
+Observer
+*/
+void makeCallback(void (*callback)(char*, void*), void* fci) {
+    // just call the callback;
+    callback("Callback called\n", fci);
+}
+
+
+/*
+Observer
+*/
+void registerObserver(void (*callback)(char*, void*), void* fci) {
+    // wait some time to pretend a blocking operation
+    sleep(10000);
+
+    // call the callback; Can be used to notify others later (e.g. in my GSoC project) 
+    // about file changes or if new I/O is there to read
+    callback("A file changed\n", fci);
 }

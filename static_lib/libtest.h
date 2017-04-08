@@ -22,3 +22,23 @@
 Simple static library with a single function to get experience in creating libraies.
 */
 void printHello(void);
+
+/*
+a+b
+*/
+int add(int a, int b);
+
+/*
+Multiply the value saved in a with 2
+*/
+void multiplyWith2(int* a);
+
+/*
+Sync Callbacks
+*/
+void makeCallback(void (*callback)(char*, void*), void* fci);
+
+/*
+Observer / Async Callbacks
+*/
+void registerObserver(void (*callback)(char*, void*), void* fci);
