@@ -2,15 +2,16 @@
   "targets": [
     {
       "target_name": "myaddon",
-      "sources": [ "bindings/hello.cc"]
+      "sources": [ "../bindings/hello.cc"]
     },
     {
       "target_name": "c_wrapper_addon",
       "cflags": ["-Wall", "-std=c++11"],
-      "sources": [ "bindings/c_wrapper.cc", "lib/exchange.cc", "lib/libtest.c" ],
+      "sources": [ "../bindings/c_wrapper.cc" ],
       "include_dirs" : [
-        "lib", "<!(node -e \"require('./server/node_modules/nan')\")"
+        "<!(node -e \"require('../server/node_modules/nan')\")"
       ],
+      "libraries": [ "-lmytest", "-L/home/debian/gsoc/preparation/interface/lib" ],
       "conditions": [
         [ "OS=='mac'", {
           "xcode_settings": {
