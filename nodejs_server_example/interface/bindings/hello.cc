@@ -20,9 +20,7 @@ void Method(const FunctionCallbackInfo<Value>& args) {
 }
 
 void init(Local<Object> exports) {
-  /*
-  Adds the method "Method" which can be called by myaddon.hello()
-  */
+  // Adds the method "Method" which can be called by myaddon.hello()
   NODE_SET_METHOD(exports, "hello", Method);
 }
 /*

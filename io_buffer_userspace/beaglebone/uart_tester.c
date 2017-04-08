@@ -17,10 +17,11 @@
 */
 
 /*
-This program will read input data received on logfile_UART1
-UART2, UART 4 and UART5 on the BeagleBone and count how many 
-packages are received. The messages are then written to four
-different files.
+This program will read input data received on UART1 UART2, 
+UART4 and UART5 on the BeagleBone and count how many packages
+are received. The messages are then written to four different
+files named logfile_UART1, logfile_UART2, logfile_UART4
+and logfile_UART5.
 */
 #define _POSIX_SOURCE // signal
 #include <stdio.h>
@@ -41,6 +42,9 @@ static int fd_logfile2 = -1;
 static int fd_logfile4 = -1; 
 static int fd_logfile5 = -1; 
 
+/*
+Signal handler - closes all file descriptors and exits the program
+*/
 void quitHandler(int s) {
     close(fd_ttyO1);
     close(fd_ttyO2);
@@ -56,10 +60,16 @@ void quitHandler(int s) {
     exit(1);
 }
 
-void handleIO(int s) {
-    printf("RECEIVED UART INTERRUPT\n");
-}
+/*
+Reads the inputs and prints the buffer to the console. Delegates writing it ot a file.
 
+@param fd           serial device file descriptor
+@param buffer       buffer filled with data
+@param size         buffer size
+@param fd_logfile   file descriptor od the log file to write the buffer content to
+@param msg_counter  pointer to the message counter which will be increased by the number
+                    of bytes read
+*/
 void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter);
 
 int main(){
@@ -108,7 +118,7 @@ int main(){
     fd_logfile4 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART4");
     fd_logfile5 = createFile("/home/debian/gsoc/preparation/serial/logfile_UART5");
     
-    // 1 byte buffer
+    // 255 byte buffer
     char buffer[255];
     ssize_t counter = 0;
     for(;;) { // exit with ctrl+c
@@ -122,6 +132,7 @@ int main(){
         memset(&buffer, 0, sizeof(buffer));
     }
     
+    // usually never reached
     close(fd_ttyO1);
     close(fd_ttyO2);
     close(fd_ttyO4);
@@ -134,7 +145,6 @@ int main(){
 
     return 0;
 }
-
 
 void printAndLog(int fd, char* buffer, int size, int fd_logfile, ssize_t* msg_counter){
     ssize_t readAmnt = read(fd, buffer, size);

@@ -16,29 +16,45 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+Simple static library with some functions to get experience in creating libraies.
+*/
 #include <stdio.h>
 
 /*
-Simple static library with a single function to get experience in creating libraies.
+Print a string
 */
 void printHello(void);
 
 /*
-a+b
+Calculate a+b
+
+@param a        first value
+@param b        second value
+@return result
 */
 int add(int a, int b);
 
 /*
 Multiply the value saved in a with 2
+
+@param a        pointer to the variable which will be doubled
+@return void
 */
 void multiplyWith2(int* a);
 
 /*
-Sync Callbacks
+Simple synchronous callback.
+
+@param callback     pointer to the function which will be called upon completion
+@param fci          some value to pass to the function
 */
 void makeCallback(void (*callback)(char*, void*), void* fci);
 
 /*
-Observer / Async Callbacks
+Simple async callback which pretends to do a blocking operation
+
+@param callback     pointer to the function which will be called upon completion
+@param fci          some value to pass to the function
 */
 void registerObserver(void (*callback)(char*, void*), void* fci);

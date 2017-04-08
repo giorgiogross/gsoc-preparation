@@ -16,29 +16,43 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+Simple shared library with some functions to get experience in creating libraies.
+*/
 #include <stdio.h>
 
 /*
-Simple static library with a single function to get experience in creating libraies.
+Print a string
 */
 void printHello(void);
 
 /*
-a+b
+Calculate a+b
+
+@param a        first value
+@param b        second value
+@return result
 */
 int add(int a, int b);
 
 /*
 Multiply the value saved in a with 2
+
+@param a        pointer to the variable which will be doubled
+@return void
 */
 void multiplyWith2(int* a);
 
 /*
-Sync Callbacks
+Simple synchronous callback.
+
+@param callback     pointer to the Exchange object which will be called
 */
 void makeCallback(void* callback);
 
 /*
-Observer / Async Callbacks
+Simple async callback.
+
+@param callback     pointer to the Exchange object which will be called
 */
 void doAsyncOperation(void* callback);

@@ -9,13 +9,21 @@ extern "C" {
 using namespace Nan;
 using namespace v8;
 
-// delegate calls to printHello()
+/*
+Delegate calls to printHello()
+*/
 NAN_METHOD(IHello) {
   printHello();
 }
 
-// This is the delegation to the "add" method
-// Input arguments can be read using the info object
+/*
+This is the delegation to the "add" method
+Input arguments can be read using the info object
+
+@param a        first value
+@param b        second value
+@return result
+*/
 NAN_METHOD(IAdd) {
   // error checking
   Nan::Maybe<int> v1 = Nan::To<int>(info[0]);
@@ -32,7 +40,12 @@ NAN_METHOD(IAdd) {
   info.GetReturnValue().Set(resVal);
 }
 
-// Delegates to multiplyWith2
+/*
+Delegates to multiplyWith2
+
+@param a        pointer to the variable which will be doubled
+@return void
+*/
 NAN_METHOD(IMult2) {
   // error checking
   Nan::Maybe<int> v1 = Nan::To<int>(info[0]);
@@ -49,6 +62,11 @@ NAN_METHOD(IMult2) {
   info.GetReturnValue().Set(resVal);
 }
 
+/*
+Synchronous callback.
+
+@param callback     pointer to the Exchange object which will be called
+*/
 NAN_METHOD(IMakeCallback) {
     Nan:: HandleScope scope;
 
@@ -105,12 +123,22 @@ class MyWorker : public AsyncWorker {
         char* result;
 };
 
+/*
+Simple async callback.
+
+@param callback     pointer to the Exchange object which will be called
+*/
 NAN_METHOD(IRegisterObserver) {
     Callback *callback = new Callback(info[0].As<Function>());
 
     AsyncQueueWorker(new MyWorker(callback));
 }
 
+/*
+Declares the methods to be exported to JS.
+
+@param Init         the init function
+*/
 NAN_MODULE_INIT(Init) {
   Nan::Set(target, New<String>("printHello").ToLocalChecked(),
       GetFunction(New<FunctionTemplate>(IHello)).ToLocalChecked());
