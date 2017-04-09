@@ -2,8 +2,6 @@ var express = require('express');
 var fs = require('fs');
 var router = express.Router();
 
-var app = express();
-
 /* executed on all requests */
 router.use(function(req, res, next) {
     console.log("There was a new request");
