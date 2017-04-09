@@ -14,6 +14,7 @@
   "author": "Giorgio Gross",
   "license": "GPL-3.0",
   "dependencies": {
+    "express": "^4.15.2",
     "react": "^15.5.3",
     "react-dom": "^15.5.3"
   },
