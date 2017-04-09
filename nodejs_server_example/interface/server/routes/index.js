@@ -2,10 +2,10 @@ var express = require('express');
 var router = express.Router();
 
 // require our custom cpp addons    todo uncomment the proper folder!
-var myAddon = require('../../gyp_linux/build/Release/myaddon');
-var c_wrapper = require('../../gyp_linux/build/Release/c_wrapper_addon');
-/*var myAddon = require('../../gyp_mac/build/Release/myaddon');
-var c_wrapper = require('../../gyp_mac/build/Release/c_wrapper_addon');*/
+/*var myAddon = require('../../gyp_linux/build/Release/myaddon');
+var c_wrapper = require('../../gyp_linux/build/Release/c_wrapper_addon');*/
+var myAddon = require('../../gyp_mac/build/Release/myaddon');
+var c_wrapper = require('../../gyp_mac/build/Release/c_wrapper_addon');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {

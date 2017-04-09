@@ -1,0 +1,23 @@
+{
+  "uart1" : {
+    "name" : "uart1",
+    "dev" : "ttyO1",
+    "logfile" : "/home/logs/logfile_UART1",
+    "payload" : "",
+    "id": 1
+  },
+  "uart2" : {
+    "name" : "uart2",
+    "dev" : "ttyO2",
+    "logfile" : "/home/logs/logfile_UART2",
+    "payload" : "",
+    "id": 2
+  },
+  "uart4" : {
+    "name" : "uart4",
+    "dev" : "ttyO4",
+    "logfile" : "/home/logs/logfile_UART4",
+    "payload" : "",
+    "id": 3
+  }
+}
