@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build",
-    "build": "webpack -d && cp src/index.html build/index.html && webpack-dev-server --content-base src/ --inline --hot --port 8000",
+    "build": "webpack -d && cp src/index.html build/index.html && webpack-dev-server --content-base src/ --inline --hot --port 8000 --history-api-fallback",
     "build:prod": "webpack -p && cp src/index.html build/index.html"
   },
   "keywords": [
@@ -17,7 +17,8 @@
     "express": "^4.15.2",
     "react": "^15.5.3",
     "react-dom": "^15.5.3",
-    "react-router": "^4.0.0"
+    "react-router": "^4.0.0",
+    "react-router-dom": "^4.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.24.1",
